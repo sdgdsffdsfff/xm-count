@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="xm-count:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="xiaomi-count.war">
+      <element id="artifact" artifact-name="xm-count:war exploded" />
+    </root>
+  </artifact>
+</component>
