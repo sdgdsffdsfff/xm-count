@@ -153,6 +153,7 @@ public class TaskController extends BaseController {
                 stringBuilder.append(" and ").append(Constant.CN_VER).append("='").append(ver.trim()).append("'");
             }
 
+
             //时间
             if (StringUtils.isNotEmpty(start) && StringUtils.isNotEmpty(end)) {
                 stringBuilder.append(" and ").append(Constant.CN_TIME).append(">='").append(start).append(" 00:00:00'");
@@ -160,17 +161,14 @@ public class TaskController extends BaseController {
 
             }
 
+
+
             modelMap.put("ip", ip);
             modelMap.put("agentid", agentid);
             modelMap.put("ver", ver);
             modelMap.put("start", start);
             modelMap.put("end", end);
 
-            stringBuilder.append(" limit ").append((getPagenumber() - 1) * getPagesize()).append(",").append(getPagesize());
-
-            List<Map<String, Object>> list = tempTableService.queryForList(stringBuilder.toString());
-
-            int totalCount = tempTableService.queryForInt(stringBuilder.toString());
 
             List<String> columnList = tempTableService.queryForMetaData(table);
 
@@ -180,6 +178,20 @@ public class TaskController extends BaseController {
             boolean hasAgent = columnList.contains(Constant.CN_AGENT);
             boolean hasVer = columnList.contains(Constant.CN_VER);
             boolean hasTime = columnList.contains(Constant.CN_TIME);
+
+
+            if(hasTime){
+                stringBuilder.append(" order by "+Constant.CN_TIME+" desc ");
+            }
+
+            stringBuilder.append(" limit ").append((getPagenumber() - 1) * getPagesize()).append(",").append(getPagesize());
+
+
+            List<Map<String, Object>> list = tempTableService.queryForList(stringBuilder.toString());
+
+            int totalCount = tempTableService.queryForInt(stringBuilder.toString());
+
+
 
 
             if (hasIp || hasAgent || hasVer || hasTime) {
