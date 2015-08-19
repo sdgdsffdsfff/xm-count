@@ -13,8 +13,15 @@ import com.xiaomi.count.scheduling.JythonDataTask;
 import com.xiaomi.count.scheduling.SqlDataTask;
 import com.xiaomi.count.service.*;
 import com.xiaomi.count.util.DataBaseUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -24,8 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -162,7 +173,6 @@ public class TaskController extends BaseController {
             }
 
 
-
             modelMap.put("ip", ip);
             modelMap.put("agentid", agentid);
             modelMap.put("ver", ver);
@@ -180,8 +190,8 @@ public class TaskController extends BaseController {
             boolean hasTime = columnList.contains(Constant.CN_TIME);
 
 
-            if(hasTime){
-                stringBuilder.append(" order by "+Constant.CN_TIME+" desc ");
+            if (hasTime) {
+                stringBuilder.append(" order by " + Constant.CN_TIME + " desc ");
             }
 
             stringBuilder.append(" limit ").append((getPagenumber() - 1) * getPagesize()).append(",").append(getPagesize());
@@ -190,8 +200,6 @@ public class TaskController extends BaseController {
             List<Map<String, Object>> list = tempTableService.queryForList(stringBuilder.toString());
 
             int totalCount = tempTableService.queryForInt(stringBuilder.toString());
-
-
 
 
             if (hasIp || hasAgent || hasVer || hasTime) {
@@ -342,6 +350,104 @@ public class TaskController extends BaseController {
         }
         return new ModelAndView("test", modelMap);
     }
+
+    @RequestMapping(value = "/excel")
+    public ResponseEntity<byte[]> excel(String tid) throws IOException {
+
+
+        try {
+            Task task = taskService.get(Integer.valueOf(tid));
+
+            String table = task.getTable();
+            String name = task.getName();
+
+            List<String> columnList = tempTableService.queryForMetaData(table);
+
+            //创建临时文件
+            File tempFile = File.createTempFile("temp", ".xls");
+
+            Workbook workbook = new HSSFWorkbook();
+            //Workbook wb = new XSSFWorkbook();
+            CreationHelper createHelper = workbook.getCreationHelper();
+            Sheet sheet = workbook.createSheet(name);
+
+            Row row = sheet.createRow(0);
+            row.setHeight((short) 350);
+
+            Cell cell;
+            for (int i = 0; i < columnList.size(); i++) {
+
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+
+                cell = row.createCell(i);
+                cell.setCellStyle(cellStyle);
+                cell.setCellValue(createHelper.createRichTextString(columnList.get(i)));
+
+                sheet.setColumnWidth(i,4000);
+            }
+
+            String sql = "select * from " + table;
+            List<Map<String, Object>> list = tempTableService.queryForList(sql);
+
+
+            for (int i = 0; list != null && i < list.size(); i++) {
+                row = sheet.createRow(i + 1);
+                Map<String, Object> map = list.get(i);
+                List<Object> values = new ArrayList<Object>(map.values());
+                for (int j = 0; j < values.size(); j++) {
+                    CellStyle cellStyle = workbook.createCellStyle();
+                    cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+
+                    cell = row.createCell(j);
+                    cell.setCellStyle(cellStyle);
+
+                    Object value = values.get(j);
+                    if (value == null) {
+                        cell.setCellValue("");
+                    } else {
+                        String type = value.getClass().getSimpleName();
+
+                        if (type.equals("Date")) {
+                            cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy/mm/dd"));
+                            cell.setCellValue(createHelper.createRichTextString(value.toString()));
+                        } else if (type.equals("BigInteger")) {
+                            cell.setCellValue(Integer.valueOf(value.toString()));
+                        } else if (type.equals("Long")) {
+                            cell.setCellValue(Integer.valueOf(value.toString()));
+                        } else if (type.equals("Integer")) {
+                            cell.setCellValue(Integer.valueOf(value.toString()));
+                        } else if (type.equals("String")) {
+                            cell.setCellValue(createHelper.createRichTextString(value.toString()));
+                        } else if (type.equals("Double")) {
+                            cell.setCellValue(Double.valueOf(value.toString()));
+                        } else {
+
+                        }
+                    }
+                }
+            }
+
+            // Write the output to a file
+            FileOutputStream fileOut = new FileOutputStream(tempFile);
+            workbook.write(fileOut);
+            fileOut.close();
+            workbook.close();
+
+            String fileName = name + ".xls";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDispositionFormData("attachment", new String(fileName.getBytes(), "ISO8859-1"));
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+            return new ResponseEntity<byte[]>(FileUtils.readFileToByteArray(tempFile), headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     @RequestMapping(value = "/check")
     @ResponseBody

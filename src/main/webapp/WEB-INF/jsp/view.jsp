@@ -63,7 +63,10 @@
             <c:if test="${timebar==1}">
                   <span>时间:<input class="easyui-datebox" style="width:150px;height: 25px;" name="start" value="${start}">~<input class="easyui-datebox" style="width:150px;height: 25px;" name="end" value="${end}"></span>
             </c:if>
-            <span><a href="javascript:void (0)" class="search" onclick="s.submit()">查询</a></span>
+            <span>
+                <a href="javascript:void (0)" class="search" onclick="s.submit()">查询</a>
+                <a href="/task/excel?tid=${tid}" class="search" >导出</a>
+            </span>
             </form>
         </div>
         </c:if>
