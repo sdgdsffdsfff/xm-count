@@ -76,20 +76,27 @@ public class QuartzJob extends QuartzJobBean {
             String sql = "SELECT * FROM history WHERE state=? AND times<? GROUP BY task_id";
             List<History> historyList = historyService.getListBySQL(sql, "0", 3);
 
-            for (History history : historyList) {
-                Task task = history.getTask();
+            try {
 
-                if (Constant.SQL.equals(task.getType())) {
-                    SqlDataTask dataTask = new SqlDataTask(task, bootService, historyService, ipSeeker, agentSeeker, history);
-                    threadPool.execute(dataTask);
+                for (History history : historyList) {
+                    Task task = history.getTask();
+
+                    if (Constant.SQL.equals(task.getType())) {
+                        SqlDataTask dataTask = new SqlDataTask(task, bootService, historyService, ipSeeker, agentSeeker, history);
+                        threadPool.execute(dataTask);
+                    }
+
+                    if (Constant.PYTHON.equals(task.getType())) {
+                        JythonDataTask jythonDataTask = new JythonDataTask(task, historyService, null);
+                        threadPool.execute(jythonDataTask);
+                    }
                 }
 
-                if (Constant.PYTHON.equals(task.getType())) {
-                    JythonDataTask jythonDataTask = new JythonDataTask(task, historyService, null);
-                    threadPool.execute(jythonDataTask);
-                }
 
+            }catch (Exception e){
+                e.printStackTrace();
             }
+
         }
 
         //跟踪线程池中在执行的任务

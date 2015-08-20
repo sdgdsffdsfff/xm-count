@@ -149,7 +149,7 @@ public class BaseDao<T> {
      */
     @SuppressWarnings("unchecked")
     public List<T> getListBySQL(String sqlString, Object... values) {
-        Query query = this.getSession().createSQLQuery(sqlString);
+        Query query = this.getSession().createSQLQuery(sqlString).addEntity(clazz);
         if (values != null) {
             for (int i = 0; i < values.length; i++) {
                 query.setParameter(i, values[i]);

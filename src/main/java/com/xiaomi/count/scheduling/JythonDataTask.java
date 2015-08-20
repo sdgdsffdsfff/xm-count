@@ -27,7 +27,6 @@ public class JythonDataTask implements Runnable {
         this.history = history;
     }
 
-    @Override
     public void run() {
 
         Date date = new Date();
