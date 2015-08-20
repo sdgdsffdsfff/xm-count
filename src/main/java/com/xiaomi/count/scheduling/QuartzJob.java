@@ -87,7 +87,7 @@ public class QuartzJob extends QuartzJobBean {
                     }
 
                     if (Constant.PYTHON.equals(task.getType())) {
-                        JythonDataTask jythonDataTask = new JythonDataTask(task, historyService, null);
+                        JythonDataTask jythonDataTask = new JythonDataTask(task, historyService, history);
                         threadPool.execute(jythonDataTask);
                     }
                 }
