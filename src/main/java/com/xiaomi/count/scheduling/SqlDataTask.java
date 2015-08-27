@@ -2,6 +2,7 @@ package com.xiaomi.count.scheduling;
 
 import com.xiaomi.count.Constant;
 import com.xiaomi.count.bean.AgentSeeker;
+import com.xiaomi.count.bean.BarSeeker;
 import com.xiaomi.count.bean.IPSeeker;
 import com.xiaomi.count.model.History;
 import com.xiaomi.count.model.Task;
@@ -25,20 +26,21 @@ public class SqlDataTask implements Runnable {
     private HistoryService historyService;
     private IPSeeker ipSeeker;
     private AgentSeeker agentSeeker;
+    private BarSeeker barSeeker;
 
     private History history;
 
-    public SqlDataTask(Task task, BootService bootService, HistoryService historyService, IPSeeker ipSeeker, AgentSeeker agentSeeker, History history) {
+    public SqlDataTask(Task task, BootService bootService, HistoryService historyService, IPSeeker ipSeeker, AgentSeeker agentSeeker, BarSeeker barSeeker, History history) {
         super();
         this.task = task;
         this.bootService = bootService;
         this.historyService = historyService;
         this.ipSeeker = ipSeeker;
         this.agentSeeker = agentSeeker;
+        this.barSeeker = barSeeker;
         this.history = history;
     }
 
-    @Override
     public void run() {
 
         //可能有多sql语句执行
@@ -58,7 +60,7 @@ public class SqlDataTask implements Runnable {
         String model = task.getModel();
 
         Date date = new Date();
-        SimpleDateFormat yhdhms = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+       // SimpleDateFormat yhdhms = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         History entity;
         if (history == null) {
@@ -114,7 +116,7 @@ public class SqlDataTask implements Runnable {
 
                     int i = 0;
                     for (String key : map.keySet()) {
-                        Object value =map.get(key);
+                        Object value = map.get(key);
                         String newKey;
                         if (Constant.IP.equalsIgnoreCase(key)) {
                             value = ipSeeker.getAddress(String.valueOf(value));
@@ -125,6 +127,9 @@ public class SqlDataTask implements Runnable {
                         } else if (Constant.TIME.equalsIgnoreCase(key)) {
 //                            newMap.put(Constant.TIME, Long.valueOf(String.valueOf(value)));
                             value = new Date(Long.valueOf(String.valueOf(value)) * 1000);
+                        } else if (Constant.USERID.equalsIgnoreCase(key)) {
+//                            newMap.put(Constant.TIME, Long.valueOf(String.valueOf(value)));
+                            value = barSeeker.getBarname(value);
                         }
 
                         try {

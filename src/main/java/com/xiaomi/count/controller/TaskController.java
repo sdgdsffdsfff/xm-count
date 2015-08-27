@@ -3,6 +3,7 @@ package com.xiaomi.count.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xiaomi.count.Constant;
 import com.xiaomi.count.bean.AgentSeeker;
+import com.xiaomi.count.bean.BarSeeker;
 import com.xiaomi.count.bean.IPSeeker;
 import com.xiaomi.count.bean.PageResults;
 import com.xiaomi.count.model.Agent;
@@ -66,6 +67,8 @@ public class TaskController extends BaseController {
     private IPSeeker ipSeeker;
     @Autowired
     private AgentSeeker agentSeeker;
+    @Autowired
+    private BarSeeker barSeeker;
 
     @RequestMapping(value = "/list")
     public ModelAndView list(String bid) {
@@ -188,6 +191,7 @@ public class TaskController extends BaseController {
             boolean hasAgent = columnList.contains(Constant.CN_AGENT);
             boolean hasVer = columnList.contains(Constant.CN_VER);
             boolean hasTime = columnList.contains(Constant.CN_TIME);
+            boolean hasUserId = columnList.contains(Constant.CN_USERID);//目标网吧
 
 
             if (hasTime) {
@@ -202,7 +206,7 @@ public class TaskController extends BaseController {
             int totalCount = tempTableService.queryForInt(stringBuilder.toString());
 
 
-            if (hasIp || hasAgent || hasVer || hasTime) {
+            if (hasIp || hasAgent || hasVer || hasTime || hasUserId) {
                 modelMap.put("toolbar", "1");//有搜索工具条
             }
             if (hasIp) {
@@ -216,6 +220,9 @@ public class TaskController extends BaseController {
             }
             if (hasTime) {
                 modelMap.put("timebar", "1");
+            }
+            if (hasUserId) {
+                modelMap.put("userIdbar", "1");
             }
 
             if (plus != null) {
@@ -333,6 +340,7 @@ public class TaskController extends BaseController {
             }
             if (hasVer) {
                 modelMap.put("verbar", "1");
+
             }
             if (hasTime) {
                 modelMap.put("timebar", "1");
@@ -384,7 +392,7 @@ public class TaskController extends BaseController {
                 cell.setCellStyle(cellStyle);
                 cell.setCellValue(createHelper.createRichTextString(columnList.get(i)));
 
-                sheet.setColumnWidth(i,4000);
+                sheet.setColumnWidth(i, 4000);
             }
 
             String sql = "select * from " + table;
@@ -523,7 +531,7 @@ public class TaskController extends BaseController {
 
             //sql任务
             if (Constant.SQL.equals(task.getType())) {
-                SqlDataTask dataTask = new SqlDataTask(task, bootService, historyService, ipSeeker, agentSeeker, null);
+                SqlDataTask dataTask = new SqlDataTask(task, bootService, historyService, ipSeeker, agentSeeker, barSeeker, null);
                 threadPool.execute(dataTask);
             }
             //jython任务
@@ -656,6 +664,7 @@ public class TaskController extends BaseController {
 
     }
 
+
     @RequestMapping(value = "/getRegion")
     @ResponseBody
     public String getRegion() {
@@ -676,6 +685,41 @@ public class TaskController extends BaseController {
         stringBuilder.append("}]");
 
         return stringBuilder.toString();
+    }
+
+
+    @RequestMapping(value = "/getVer")
+    @ResponseBody
+    public String getVer(String tid) {
+        try {
+            Task task = taskService.get(Integer.valueOf(tid));
+            String table = task.getTable();
+
+            String sql = "SELECT DISTINCT " + Constant.CN_VER + " from " + table;
+
+            List<Map<String, Object>> list = tempTableService.queryForList(sql);
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.append("[");
+
+            for (int i = 0; i < list.size(); i++) {
+                Map<String, Object> map = list.get(i);
+                Object value = map.get(Constant.CN_VER);
+                stringBuilder.append("{\"id\":\"").append(value).append("\",\"text\":\"").append(value).append("\"}");
+                if (i != list.size() - 1) {
+                    stringBuilder.append(",");
+                }
+            }
+
+            stringBuilder.append("]");
+
+            return stringBuilder.toString();
+
+        } catch (Exception e) {
+
+        }
+        return null;
     }
 
     private String parseTreeJson(List<Region> regionList) {

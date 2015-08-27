@@ -2,6 +2,7 @@ package com.xiaomi.count.scheduling;
 
 import com.xiaomi.count.Constant;
 import com.xiaomi.count.bean.AgentSeeker;
+import com.xiaomi.count.bean.BarSeeker;
 import com.xiaomi.count.bean.IPSeeker;
 import com.xiaomi.count.model.History;
 import com.xiaomi.count.model.Task;
@@ -35,9 +36,12 @@ public class QuartzJob extends QuartzJobBean {
 
     private AgentSeeker agentSeeker;
 
+    private BarSeeker barSeeker;
+
     private HistoryService historyService;
 
     private ThreadPoolTaskExecutor threadPool;
+
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -57,7 +61,7 @@ public class QuartzJob extends QuartzJobBean {
                 if (strDate.equals(timer.getTime())) {
                     //sql任务
                     if (Constant.SQL.equals(task.getType())) {
-                        SqlDataTask dataTask = new SqlDataTask(task, bootService, historyService, ipSeeker, agentSeeker, null);
+                        SqlDataTask dataTask = new SqlDataTask(task, bootService, historyService, ipSeeker, agentSeeker,barSeeker, null);
                         threadPool.execute(dataTask);
                     }
                     //jython任务
@@ -82,7 +86,7 @@ public class QuartzJob extends QuartzJobBean {
                     Task task = history.getTask();
 
                     if (Constant.SQL.equals(task.getType())) {
-                        SqlDataTask dataTask = new SqlDataTask(task, bootService, historyService, ipSeeker, agentSeeker, history);
+                        SqlDataTask dataTask = new SqlDataTask(task, bootService, historyService, ipSeeker, agentSeeker,barSeeker, history);
                         threadPool.execute(dataTask);
                     }
 
@@ -151,5 +155,13 @@ public class QuartzJob extends QuartzJobBean {
 
     public void setThreadPool(ThreadPoolTaskExecutor threadPool) {
         this.threadPool = threadPool;
+    }
+
+    public BarSeeker getBarSeeker() {
+        return barSeeker;
+    }
+
+    public void setBarSeeker(BarSeeker barSeeker) {
+        this.barSeeker = barSeeker;
     }
 }

@@ -14,6 +14,8 @@
         <property name="agentService" ref="agentService"/>
     </bean>
 
+    <bean id="barSeeker" class="com.xiaomi.count.bean.BarSeeker" init-method="init" />
+
     <!--spring线程池-->
     <bean id="threadPool" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
         <property name="corePoolSize" value="1"/>
@@ -36,6 +38,7 @@
                 <entry key="threadPool" value-ref="threadPool"/>
                 <entry key="ipSeeker" value-ref="ipSeeker"/>
                 <entry key="agentSeeker" value-ref="agentSeeker"/>
+                <entry key="barSeeker" value-ref="barSeeker"/>
             </map>
         </property>
     </bean>

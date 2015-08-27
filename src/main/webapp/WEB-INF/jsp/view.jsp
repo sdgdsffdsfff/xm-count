@@ -58,7 +58,10 @@
                 <span>代理:<input class="easyui-combotree" data-options="url:'/task/getAgent',method:'get'" style="width:200px;height: 25px;" name="agentid" value="${agentid}" /> </span>
             </c:if>
             <c:if test="${verbar==1}">
-                 <span>版本:<input class="easyui-textbox" style="width:200px;height: 25px;" name="ver" value="${ver}" /> </span>
+                 <span>版本:<input class="easyui-combotree" data-options="url:'/task/getVer?tid=${tid}',method:'get'" style="width:200px;height: 25px;" name="ver" value="${ver}" /> </span>
+            </c:if>
+            <c:if test="${userIdbar==1}">
+                <span>网吧:<input class="easyui-numberbox" style="width:200px;height: 25px;" name="userId" value="${userId}" /> </span>
             </c:if>
             <c:if test="${timebar==1}">
                   <span>时间:<input class="easyui-datebox" style="width:150px;height: 25px;" name="start" value="${start}">~<input class="easyui-datebox" style="width:150px;height: 25px;" name="end" value="${end}"></span>

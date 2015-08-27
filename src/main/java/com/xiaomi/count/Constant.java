@@ -19,6 +19,9 @@ public class Constant {
     public static final String TIME = "TIME";
     public static final String CN_TIME = "时间";
 
+    public static final String USERID = "USERID";
+    public static final String CN_USERID = "网吧";
+
 
     public static final String ALL = "全部";
 

@@ -11,7 +11,7 @@ import java.util.Map;
 public class DataBaseUtils {
 
     private static final String DRIVER = "com.mysql.jdbc.Driver";
-    private static final String URL = "jdbc:mysql://192.168.1.220:3306/xm_count?useServerPrepStmts=false&rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf8";
+    private static final String URL = "jdbc:mysql://192.168.38.220:3306/xm_count?useServerPrepStmts=false&rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf8";
     private static final String USER = "root";
     private static final String PASSWORD = "1234567";
 
